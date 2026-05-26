@@ -2,6 +2,7 @@ import sequelize from '../config/db.js';
 import User from './User.js';
 import Team from './Team.js';
 import TeamMember from './TeamMember.js';
+import Task from './Task.js';
 
 // ─── Associations ──────────────────────────────────────────────────────────────
 
@@ -39,6 +40,22 @@ Team.belongsToMany(User, {
   as: 'users',
 });
 
+// A Team has many Tasks; deleting a Team cascades to its Tasks
+Team.hasMany(Task, {
+  foreignKey: 'teamId',
+  as: 'tasks',
+  onDelete: 'CASCADE',
+});
+Task.belongsTo(Team, { foreignKey: 'teamId', as: 'team' });
+
+// A User has many assigned Tasks; deleting a User nullifies assignee
+User.hasMany(Task, {
+  foreignKey: 'assignedTo',
+  as: 'assignedTasks',
+  onDelete: 'SET NULL',
+});
+Task.belongsTo(User, { foreignKey: 'assignedTo', as: 'assignee' });
+
 // ─── Export ────────────────────────────────────────────────────────────────────
 
 const db = {
@@ -46,7 +63,8 @@ const db = {
   User,
   Team,
   TeamMember,
+  Task,
 };
 
-export { sequelize, User, Team, TeamMember };
+export { sequelize, User, Team, TeamMember, Task };
 export default db;

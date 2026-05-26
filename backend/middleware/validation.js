@@ -14,3 +14,21 @@ export const validateBody = (schema) => (req, res, next) => {
   req.body = value;
   next();
 };
+
+export const validateQuery = (schema) => (req, res, next) => {
+  const { error, value } = schema.validate(req.query, {
+    abortEarly: false, // Return all errors, not just the first one
+    stripUnknown: true, // Remove unknown fields from query
+  });
+
+  if (error) {
+    return res.status(400).json({
+      message: 'Validation error',
+      errors: error.details.map((detail) => detail.message),
+    });
+  }
+
+  req.query = value;
+  next();
+};
+

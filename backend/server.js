@@ -10,6 +10,7 @@ import db from './models/index.js';
 import configurePassport from './config/passport.js';
 import authRoutes from './routes/auth.js';
 import teamsRoutes from './routes/teams.js';
+import taskRoutes from './routes/tasks.js';
 
 // Load environment variables
 dotenv.config();
@@ -71,6 +72,9 @@ app.use('/api/auth', authRoutes);
 
 // Team Routes
 app.use('/api/teams', teamsRoutes);
+
+// Task Routes
+app.use('/api/tasks', taskRoutes);
 
 // Connect to database, sync models, and start server
 const startServer = async () => {
