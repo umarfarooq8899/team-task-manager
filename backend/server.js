@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';
+import pg from 'pg';
 import passport from 'passport';
 
 import { connectDB } from './config/db.js';
@@ -24,21 +25,20 @@ configurePassport(passport);
 // Middleware
 app.use(
   cors({
-    origin: 'http://localhost:5173', // Adjust this to your frontend URL
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true, // Crucial for sessions/cookies
   })
 );
 app.use(express.json());
 
 const PgSession = connectPg(session);
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL || `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT || 5432}/${process.env.DB_NAME}`,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+});
+
 const sessionStore = new PgSession({
-  conObject: {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 5432,
-    database: process.env.DB_NAME,
-  },
+  pool: pool,
   tableName: 'session',
 });
 
