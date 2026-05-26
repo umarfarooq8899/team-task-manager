@@ -209,21 +209,9 @@ export const addTeamMember = async (req, res) => {
 // @route   DELETE /api/teams/:id
 // @access  Private
 export const deleteTeam = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    const team = await Team.findByPk(id);
-
-    if (!team) {
-      return res.status(404).json({ message: 'Team not found.' });
-    }
-
-    // Only the creator of the team can delete it
-    if (team.createdBy !== req.user.id) {
-      return res.status(403).json({ message: 'Access denied. Only the team creator can delete this team.' });
-    }
-
-    // Delete the team (cascading setting automatically removes associated TeamMember entries)
+    // team is pre-loaded and authorized by ensureTeamCreator middleware
+    const team = req.team;
     await team.destroy();
 
     return res.status(200).json({ message: 'Team deleted successfully.' });

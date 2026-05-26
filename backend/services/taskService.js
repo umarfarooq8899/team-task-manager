@@ -48,7 +48,10 @@ export const createTask = async (taskData, userId) => {
     }
   }
 
-  const task = await Task.create(taskData);
+  const task = await Task.create({
+    ...taskData,
+    createdBy: userId,
+  });
   return getTaskByIdPopulated(task.id);
 };
 

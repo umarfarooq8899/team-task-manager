@@ -2,6 +2,7 @@ import express from 'express';
 import Joi from 'joi';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { validateBody, validateQuery } from '../middleware/validation.js';
+import { ensureTaskEditor } from '../middleware/authz.js';
 import {
   createTask,
   getTasks,
@@ -72,7 +73,8 @@ const getTasksQuerySchema = Joi.object({
 router.post('/', validateBody(createTaskSchema), createTask);
 router.get('/', validateQuery(getTasksQuerySchema), getTasks);
 router.get('/:id', getTaskById);
-router.put('/:id', validateBody(updateTaskSchema), updateTask);
-router.delete('/:id', deleteTask);
+router.put('/:id', ensureTaskEditor, validateBody(updateTaskSchema), updateTask);
+router.delete('/:id', ensureTaskEditor, deleteTask);
 
 export default router;
+

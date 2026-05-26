@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [errors, setErrors] = useState({});
@@ -53,9 +55,12 @@ const Register = () => {
     setLoading(true);
     try {
       await register(formData.name, formData.email, formData.password);
+      showToast('Registration successful! Welcome.', 'success');
       navigate('/dashboard');
     } catch (err) {
-      setServerError(err.response?.data?.message || 'Registration failed. Please try again.');
+      const msg = err.response?.data?.message || err.response?.data?.errors?.join(', ') || 'Registration failed. Please try again.';
+      setServerError(msg);
+      showToast(msg, 'error');
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import express from 'express';
 import Joi from 'joi';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validation.js';
+import { ensureTeamCreator } from '../middleware/authz.js';
 import {
   createTeam,
   getTeams,
@@ -65,6 +66,7 @@ router.post('/:id/members', validateBody(addMemberSchema), addTeamMember);
 // @route   DELETE /api/teams/:id
 // @desc    Delete a team (creator only)
 // @access  Private (Authenticated)
-router.delete('/:id', deleteTeam);
+router.delete('/:id', ensureTeamCreator, deleteTeam);
+
 
 export default router;

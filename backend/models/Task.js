@@ -51,6 +51,14 @@ Task.init(
         key: 'id',
       },
     },
+    createdBy: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+    },
     teamId: {
       type: DataTypes.UUID,
       allowNull: false,

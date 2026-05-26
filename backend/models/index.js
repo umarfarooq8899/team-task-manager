@@ -56,6 +56,15 @@ User.hasMany(Task, {
 });
 Task.belongsTo(User, { foreignKey: 'assignedTo', as: 'assignee' });
 
+// A User can create many Tasks; deleting a User cascades to delete their Tasks
+User.hasMany(Task, {
+  foreignKey: 'createdBy',
+  as: 'createdTasks',
+  onDelete: 'CASCADE',
+});
+Task.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+
+
 // ─── Export ────────────────────────────────────────────────────────────────────
 
 const db = {

@@ -58,6 +58,12 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  // Reset filters when selected team changes
+  useEffect(() => {
+    setAssigneeFilter('all');
+    setStatusFilter('all');
+  }, [selectedTeam]);
+
   // ─── Logout Handlers ────────────────────────────────────────────────────────
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -200,6 +206,8 @@ const Dashboard = () => {
           return task.assignedTo === user?.id;
         } else if (assigneeFilter === 'others') {
           return task.assignedTo && task.assignedTo !== user?.id;
+        } else {
+          return task.assignedTo === assigneeFilter;
         }
       }
 
@@ -389,6 +397,15 @@ const Dashboard = () => {
                   <option value="unassigned">Unassigned Only</option>
                   <option value="me">Assigned to Me</option>
                   <option value="others">Assigned to Others</option>
+                  {selectedTeam && selectedTeam.members && selectedTeam.members.length > 0 && (
+                    <optgroup label="Team Members">
+                      {selectedTeam.members.map((m) => (
+                        <option key={m.user?.id} value={m.user?.id}>
+                          {m.user?.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
               </div>
             </div>

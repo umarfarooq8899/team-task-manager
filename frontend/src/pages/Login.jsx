@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
@@ -44,9 +46,12 @@ const Login = () => {
     setLoading(true);
     try {
       await login(formData.email, formData.password);
+      showToast('Welcome back!', 'success');
       navigate('/dashboard');
     } catch (err) {
-      setServerError(err.response?.data?.message || 'Login failed. Please try again.');
+      const msg = err.response?.data?.message || 'Login failed. Please try again.';
+      setServerError(msg);
+      showToast(msg, 'error');
     } finally {
       setLoading(false);
     }
