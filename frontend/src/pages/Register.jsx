@@ -66,50 +66,6 @@ const Register = () => {
     }
   };
 
-  // Password strength indicator
-  const getPasswordStrength = (pwd) => {
-    if (!pwd) return { strength: 0, label: '', color: '' };
-    let score = 0;
-    if (pwd.length >= 6) score++;
-    if (pwd.length >= 10) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[^A-Za-z0-9]/.test(pwd)) score++;
-    if (score <= 1) return { strength: score, label: 'Weak', color: 'bg-red-500' };
-    if (score <= 3) return { strength: score, label: 'Fair', color: 'bg-amber-500' };
-    return { strength: score, label: 'Strong', color: 'bg-emerald-500' };
-  };
-
-  const pwdStrength = getPasswordStrength(formData.password);
-
-  const InputField = ({ id, name, type, label, placeholder, autoComplete, value }) => (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-slate-300 mb-1.5">
-        {label}
-      </label>
-      <input
-        id={id}
-        name={name}
-        type={type}
-        autoComplete={autoComplete}
-        value={value}
-        onChange={handleChange}
-        placeholder={placeholder}
-        className={`w-full bg-slate-900/60 border rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm outline-none transition-all duration-200
-          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-          ${errors[name] ? 'border-red-500/70 focus:ring-red-500 focus:border-red-500' : 'border-slate-700 hover:border-slate-600'}`}
-      />
-      {errors[name] && (
-        <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
-          <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          {errors[name]}
-        </p>
-      )}
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
       {/* Background blobs */}
@@ -151,6 +107,8 @@ const Register = () => {
               placeholder="John Doe"
               autoComplete="name"
               value={formData.name}
+              onChange={handleChange}
+              error={errors.name}
             />
 
             <InputField
@@ -161,52 +119,21 @@ const Register = () => {
               placeholder="you@example.com"
               autoComplete="email"
               value={formData.email}
+              onChange={handleChange}
+              error={errors.email}
             />
 
-            {/* Password with strength meter */}
-            <div>
-              <label htmlFor="register-password" className="block text-sm font-medium text-slate-300 mb-1.5">
-                Password
-              </label>
-              <input
-                id="register-password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Min. 6 characters"
-                className={`w-full bg-slate-900/60 border rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm outline-none transition-all duration-200
-                  focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-                  ${errors.password ? 'border-red-500/70 focus:ring-red-500 focus:border-red-500' : 'border-slate-700 hover:border-slate-600'}`}
-              />
-              {/* Strength meter */}
-              {formData.password && (
-                <div className="mt-2">
-                  <div className="flex gap-1 mb-1">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div
-                        key={i}
-                        className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                          i <= pwdStrength.strength ? pwdStrength.color : 'bg-slate-700'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-xs text-slate-400">
-                    Strength: <span className={`font-medium ${pwdStrength.color.replace('bg-', 'text-')}`}>{pwdStrength.label}</span>
-                  </p>
-                </div>
-              )}
-              {errors.password && (
-                <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  {errors.password}
-                </p>
-              )}
-            </div>
+            <InputField
+              id="register-password"
+              name="password"
+              type="password"
+              label="Password"
+              placeholder="Min. 6 characters"
+              autoComplete="new-password"
+              value={formData.password}
+              onChange={handleChange}
+              error={errors.password}
+            />
 
             <InputField
               id="register-confirm-password"
@@ -216,6 +143,8 @@ const Register = () => {
               placeholder="••••••••"
               autoComplete="new-password"
               value={formData.confirmPassword}
+              onChange={handleChange}
+              error={errors.confirmPassword}
             />
 
             {/* Submit */}
@@ -259,5 +188,35 @@ const Register = () => {
     </div>
   );
 };
+
+// Reusable Input Field component defined outside the main component
+// to prevent unmounting and focus loss on state changes (keystrokes)
+const InputField = ({ id, name, type, label, placeholder, autoComplete, value, onChange, error }) => (
+  <div>
+    <label htmlFor={id} className="block text-sm font-medium text-slate-300 mb-1.5">
+      {label}
+    </label>
+    <input
+      id={id}
+      name={name}
+      type={type}
+      autoComplete={autoComplete}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className={`w-full bg-slate-900/60 border rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm outline-none transition-all duration-200
+        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+        ${error ? 'border-red-500/70 focus:ring-red-500 focus:border-red-500' : 'border-slate-700 hover:border-slate-600'}`}
+    />
+    {error && (
+      <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+        <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+        </svg>
+        {error}
+      </p>
+    )}
+  </div>
+);
 
 export default Register;
