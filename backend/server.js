@@ -19,13 +19,25 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy is required in production when behind reverse proxies (like Render)
+// to support secure cookies via HTTPS.
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Configure Passport
 configurePassport(passport);
+
+// Sanitize FRONTEND_URL to ensure no trailing slash (which causes CORS issues)
+let frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+if (frontendUrl.endsWith('/')) {
+  frontendUrl = frontendUrl.slice(0, -1);
+}
 
 // Middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: frontendUrl,
     credentials: true, // Crucial for sessions/cookies
   })
 );
